@@ -20,4 +20,8 @@ func main() {
 	client := sclient.InitClient(name, connection)
 	defer client.DeleteClient()
 
+	go client.HandleMessage()
+	for {
+		client.SendMessage()
+	}
 }
