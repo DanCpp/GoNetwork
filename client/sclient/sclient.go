@@ -1,8 +1,10 @@
 package sclient
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"os"
 )
 
 func (cl *client) clearMsgBuffer() {
@@ -14,12 +16,14 @@ type client struct {
 	message_buffer string
 	read_buffer    []byte
 	connection     net.Conn
+	reader         *bufio.Reader
 }
 
 func InitClient(name string, connection net.Conn) *client {
 	return &client{
 		name:       name,
 		connection: connection,
+		reader:     bufio.NewReader(os.Stdin),
 	}
 }
 
@@ -35,12 +39,13 @@ func (cl *client) HandleMessage() {
 			fmt.Println(err)
 			break
 		}
-		fmt.Println(string(cl.read_buffer[0:n]))
+		fmt.Println(string(cl.read_buffer[0 : n-1])) //Reading to '\n'
 	}
 }
 
 func (cl *client) SendMessage() {
-	_, err := fmt.Scanln(&cl.message_buffer)
+	var err error
+	cl.message_buffer, err = cl.reader.ReadString('\n')
 	if err != nil {
 		fmt.Println(err)
 		return
